@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Account | Exporter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --border: #e2e8f0;
+        }
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        h2 { font-size: 24px; font-weight: 700; color: #1e293b; margin-bottom: 10px; }
+        p { font-size: 14px; color: #64748b; margin-bottom: 30px; }
+
+        .form-group { margin-bottom: 25px; text-align: left; }
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 18px;
+            letter-spacing: 4px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+
+        .btn-verify {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-verify:hover { background: var(--primary-dark); }
+        .btn-verify:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        #error-msg {
+            color: #ef4444;
+            font-size: 14px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .resend-text {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #64748b;
+        }
+        .resend-text a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .resend-text a:hover {
+            color: var(--primary-dark);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Verify your email</h2>
+        <p>We sent a 6-digit verification code to your email. The code is valid for 5 minutes.</p>
+        
+        <div class="form-group">
+            <input type="text" id="otp" placeholder="123456" maxlength="6">
+        </div>
+
+        <div id="error-msg"></div>
+
+        <button class="btn-verify" id="verify-btn" onclick="handleVerify()">Verify Account</button>
+        
+        <div class="resend-text">
+            Didn't receive the code or it expired? <a href="#" id="resend-link" onclick="handleResend(event)">Resend OTP</a>
+        </div>
+    </div>
+
+    <script>
+        async function handleVerify() {
+            const otp = document.getElementById('otp').value;
+            const btn = document.getElementById('verify-btn');
+            const errorMsg = document.getElementById('error-msg');
+
+            errorMsg.style.display = 'none';
+
+            if(!otp || otp.length < 6) {
+                errorMsg.innerText = "Please enter the 6-digit code";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Verifying...";
+
+            try {
+                const formData = new FormData();
+                formData.append('otp', otp);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                const response = await fetch('/exporter/verify-otp/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if(result.status === 'success') {
+                    btn.innerText = "Verified!";
+                    btn.style.background = "#22c55e"; // Success color
+                    setTimeout(() => {
+                        window.location.href = result.redirect;
+                    }, 500);
+                } else {
+                    errorMsg.innerText = result.message;
+                    errorMsg.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerText = "Verify Account";
+                }
+            } catch (e) {
+                console.error(e);
+                errorMsg.innerText = "An error occurred during verification";
+                errorMsg.style.display = 'block';
+                btn.disabled = false;
+                btn.innerText = "Verify Account";
+            }
+        }
+
+        async function handleResend(e) {
+            e.preventDefault();
+            const resendLink = document.getElementById('resend-link');
+            const errorMsg = document.getElementById('error-msg');
+            
+            if(resendLink.style.pointerEvents === 'none') return;
+            
+            resendLink.innerText = "Sending...";
+            resendLink.style.pointerEvents = 'none';
+            resendLink.style.color = '#94a3b8';
+            errorMsg.style.display = 'none';
+
+            try {
+                const formData = new FormData();
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                const response = await fetch('/exporter/resend-otp/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if(result.status === 'success') {
+                    errorMsg.innerText = "A new OTP has been sent!";
+                    errorMsg.style.color = "#22c55e"; // Success green
+                    errorMsg.style.display = 'block';
+                    
+                    // Countdown timer
+                    let seconds = 60;
+                    const interval = setInterval(() => {
+                        resendLink.innerText = `Resend in ${seconds}s`;
+                        seconds--;
+                        if(seconds < 0) {
+                            clearInterval(interval);
+                            resendLink.innerText = "Resend OTP";
+                            resendLink.style.pointerEvents = 'auto';
+                            resendLink.style.color = 'var(--primary)';
+                        }
+                    }, 1000);
+                } else {
+                    errorMsg.innerText = result.message;
+                    errorMsg.style.color = "#ef4444";
+                    errorMsg.style.display = 'block';
+                    resendLink.innerText = "Resend OTP";
+                    resendLink.style.pointerEvents = 'auto';
+                    resendLink.style.color = 'var(--primary)';
+                }
+            } catch (e) {
+                console.error(e);
+                errorMsg.innerText = "An error occurred while resending";
+                errorMsg.style.color = "#ef4444";
+                errorMsg.style.display = 'block';
+                resendLink.innerText = "Resend OTP";
+                resendLink.style.pointerEvents = 'auto';
+                resendLink.style.color = 'var(--primary)';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exporter Details Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --header-blue: #2c5ba1;
+            --company-yellow: #f5b041;
+            --product-orange: #f27141;
+            --target-green: #5eb035;
+            --outreach-purple: #9b59b6;
+            --tech-teal: #16a085;
+            --text-main: #333333;
+            --text-light: #777777;
+            --border-color: #e0e6ed;
+        }
+        
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 40px 20px;
+        }
+        
+        .dashboard-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border-top: 8px solid #a3c2f0;
+        }
+
+        .main-header {
+            background: var(--header-blue);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .panel-header {
+            padding: 12px 20px;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .bg-company { background-color: var(--company-yellow); }
+        .bg-product { background-color: var(--product-orange); }
+        .bg-target { background-color: var(--target-green); }
+        .bg-outreach { background-color: var(--outreach-purple); }
+        .bg-tech { background-color: var(--tech-teal); }
+
+        .panel-body {
+            padding: 20px;
+        }
+
+        .field-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        .field-row:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .field-icon {
+            width: 30px;
+            color: var(--text-light);
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .field-label {
+            width: 150px;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .field-input {
+            flex-grow: 1;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            color: var(--text-main);
+            transition: border-color 0.2s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--header-blue);
+        }
+
+        .save-btn {
+            background: var(--header-blue);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 30px;
+            display: block;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        .save-btn:hover {
+            background: #1e4580;
+        }
+
+        .tech-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: white;
+        }
+        .status-badge.verified { background: var(--target-green); }
+        .status-badge.pending { background: #e74c3c; }
+
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <div class="main-header">
+            <i class="fas fa-clipboard-list" style="color: #f1c40f;"></i>
+            <i class="fas fa-globe-americas" style="color: #3498db; margin-left: -10px;"></i>
+            Exporter Details
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="grid-container">
+                
+                <!-- Company Details -->
+                <div class="panel">
+                    <div class="panel-header bg-company">
+                        <i class="far fa-building"></i> Company Details
+                    </div>
+                    <div class="panel-body">
+                        <div class="field-row">
+                            <div class="field-icon"><i class="fas fa-city" style="color: #f39c12;"></i></div>
+                            <div class="field-label">Company Name</div>
+                            <div class="field-input">{{ form.company_name }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-icon"><i class="fas fa-tags" style="color: #e74c3c;"></i></div>
+                            <div class="field-label">Industry / Category</div>
+                            <div class="field-input">{{ form.industry }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-icon"><i class="fas fa-globe" style="color: #3498db;"></i></div>
+                            <div class="field-label">Main Domain</div>
+                            <div class="field-input">
+                                <input type="text" class="form-control" value="{{ account.main_domain|default:'' }}" disabled>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Information -->
+                <div class="panel">
+                    <div class="panel-header bg-product">
+                        <i class="fas fa-box-open"></i> Product Information
+                    </div>
+                    <div class="panel-body">
+                        <div class="field-row">
+                            <div class="field-icon"><i class="fas fa-clipboard-check" style="color: #e67e22;"></i></div>
+                            <div class="field-label">Product List (SKU)</div>
+                            <div class="field-input">{{ form.product_list_sku }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-icon"><i class="far fa-file-alt" style="color: #f1c40f;"></i></div>
+                            <div class="field-label">Description</div>
+                            <div class="field-input">{{ form.product_description }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Target Market -->
+                <div class="panel">
+                    <div class="panel-header bg-target">
+                        <i class="fas fa-globe-americas"></i> Target Market
+                    </div>
+                    <div class="panel-body">
+                        <div class="field-row">
+                            <div class="field-icon"><i class="fas fa-map-marker-alt" style="color: #e67e22;"></i></div>
+                            <div class="field-label">Region / Country</div>
+                            <div class="field-input">{{ form.target_region }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-icon"><i class="far fa-handshake" style="color: #3498db;"></i></div>
+                            <div class="field-label">Buyer Type</div>
+                            <div class="field-input">{{ form.buyer_type }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Outreach Preferences -->
+                <div class="panel">
+                    <div class="panel-header bg-outreach">
+                        <i class="fas fa-comment-dots"></i> Outreach Preferences
+                    </div>
+                    <div class="panel-body">
+                        <div class="field-row">
+                            <div class="field-icon">
+                                <i class="fas fa-envelope" style="color: #34495e;"></i>
+                            </div>
+                            <div class="field-label">
+                                Preferred Channel<br>
+                                <span style="font-size: 12px; display:flex; gap:5px; margin-top:5px;">
+                                    <i class="fas fa-envelope" style="color: #3498db;"></i>
+                                    <i class="fab fa-linkedin" style="color: #0077b5;"></i>
+                                    <i class="fab fa-whatsapp" style="color: #25D366;"></i>
+                                </span>
+                            </div>
+                            <div class="field-input">{{ form.preferred_channel }}</div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-icon"><i class="fas fa-language" style="color: #16a085;"></i></div>
+                            <div class="field-label">Language Preference</div>
+                            <div class="field-input">{{ form.language_preference }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technical Setup -->
+                <div class="panel full-width">
+                    <div class="panel-header bg-tech">
+                        <i class="fas fa-shield-alt"></i> Technical Setup
+                    </div>
+                    <div class="panel-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="field-row">
+                            <div class="field-icon"><i class="fas fa-shield-check" style="color: #27ae60;"></i></div>
+                            <div class="field-label">Domain Verification<br><small>(SPF · DKIM · DMARC)</small></div>
+                            <div class="field-input tech-status">
+                                {% if account.is_domain_verified %}
+                                    <span class="status-badge verified">Verified</span>
+                                {% else %}
+                                    <span class="status-badge pending">Pending</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field-icon"><i class="far fa-envelope" style="color: #3498db;"></i></div>
+                            <div class="field-label">Business Email</div>
+                            <div class="field-input">
+                                <input type="text" class="form-control" value="{{ account.business_email }}" disabled>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            
+            <button type="submit" class="save-btn" id="find-buyers-btn">Find Buyers</button>
+        </form>
+
+    </div>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const btn = document.getElementById('find-buyers-btn');
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Triggering n8n Workflow...';
+            btn.style.opacity = '0.7';
+            btn.style.pointerEvents = 'none';
+        });
+    </script>
+</body>
+</html>
