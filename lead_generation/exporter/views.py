@@ -141,19 +141,17 @@ def exporter_dashboard_view(request):
             print(f"DEBUG: Webhook URL: {webhook_url}")
             if webhook_url:
                 payload = {
-                    'account_id': exporter_account.id,
-                    'user_id': request.user.id,
+                    'exporter_id': str(exporter_account.exporter_id),
+                    'company_name': details.company_name or "",
+                    'product_category': details.industry or "",
+                    'target_market': details.target_region or "",
                     'email': exporter_account.business_email,
-                    'company_name': details.company_name,
-                    'industry': details.industry,
-                    'target_region': details.target_region,
-                    'product_description': details.product_description,
                     'timestamp': timezone.now().isoformat()
                 }
-                print(f"DEBUG: Sending payload: {payload}")
+                print(f"DEBUG: Sending payload to n8n: {payload}")
                 try:
                     # We send it as an async-like request (short timeout) so it doesn't hang the UI
-                    response = requests.post(webhook_url, json=payload, timeout=10)
+                    response = requests.post(webhook_url, json=payload, timeout=15)
                     print(f"DEBUG: n8n Webhook Status: {response.status_code}")
                     print(f"DEBUG: n8n Response: {response.text}")
                 except Exception as e:

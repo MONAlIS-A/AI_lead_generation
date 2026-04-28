@@ -1,7 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
+import uuid
 
 class ExporterAccount(models.Model):
+    exporter_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, null=True, blank=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='exporter_profile')
     business_email = models.EmailField(unique=True)
     main_domain = models.CharField(max_length=255, blank=True, null=True)
